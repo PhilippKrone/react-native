@@ -12,25 +12,31 @@
 #import "RCTConvert.h"
 #import "RCTEventDispatcher.h"
 #import "RCTUtils.h"
+#import "RCTUIManager.h"
 #import "UIView+React.h"
 
 @implementation RCTTextView
 {
+  RCTBridge *_bridge;
   RCTEventDispatcher *_eventDispatcher;
   BOOL _jsRequestingFirstResponder;
+  BOOL _autoGrow;
+  float _origHeight;
   NSString *_placeholder;
   UITextView *_placeholderView;
   UITextView *_textView;
   NSInteger _nativeEventCount;
 }
 
-- (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
+- (instancetype)initWithBridge:(RCTBridge *)bridge
 {
-  RCTAssertParam(eventDispatcher);
+  RCTAssertParam(bridge);
 
   if ((self = [super initWithFrame:CGRectZero])) {
+    _bridge = bridge;
+    _autoGrow = false;
     _contentInset = UIEdgeInsetsZero;
-    _eventDispatcher = eventDispatcher;
+    _eventDispatcher = _bridge.eventDispatcher;
     _placeholderTextColor = [self defaultPlaceholderTextColor];
 
     _textView = [[UITextView alloc] initWithFrame:self.bounds];
@@ -67,6 +73,11 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
   
   _textView.textContainerInset = adjustedTextContainerInset;
   _placeholderView.textContainerInset = adjustedTextContainerInset;
+  
+  if (! _origHeight) {
+    _origHeight = self.frame.size.height;
+  }
+  [self updateTextViewFrame];
 }
 
 - (void)updatePlaceholder
@@ -89,6 +100,44 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
   }
 }
 
+- (void)updateTextViewFrame
+{
+  if (self.superview == nil) {
+    return;
+  }
+
+  if (_autoGrow) {
+    UITextView *textView;
+    if (_placeholderView) {
+      textView = [_placeholderView isHidden] ? _textView : _placeholderView;
+    } else {
+      textView = _textView;
+    }
+    
+    if (CGRectIsEmpty(self.frame)) {
+      return;
+    }
+
+    float currentHeight = textView.frame.size.height;
+    float newHeight;
+
+    textView.scrollEnabled = NO;
+    [textView sizeToFit];
+
+    if (textView.frame.size.height >= _origHeight) {
+      newHeight = textView.frame.size.height;
+    } else {
+      newHeight = _origHeight;
+    }
+  
+    if (newHeight != currentHeight) {
+      CGRect newFrame = CGRectMake(0, 0, self.frame.size.width, newHeight);
+      [_bridge.uiManager setFrame:newFrame
+                          forView:self];
+    }
+  }
+}
+
 - (UIFont *)font
 {
   return _textView.font;
@@ -98,6 +147,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 {
   _textView.font = font;
   [self updatePlaceholder];
+  [self updateTextViewFrame];
 }
 
 - (UIColor *)textColor
@@ -114,6 +164,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 {
   _placeholder = placeholder;
   [self updatePlaceholder];
+  [self updateTextViewFrame];
 }
 
 - (void)setPlaceholderTextColor:(UIColor *)placeholderTextColor
@@ -194,6 +245,11 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
   return _textView.autocorrectionType == UITextAutocorrectionTypeYes;
 }
 
+- (void)setAutoGrow:(BOOL)autoGrow
+{
+  _autoGrow = autoGrow;
+}
+
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView
 {
   if (_selectTextOnFocus) {
@@ -220,6 +276,8 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 - (void)textViewDidChange:(UITextView *)textView
 {
   [self _setPlaceholderVisibility];
+  [self updateTextViewFrame];
+
   _nativeEventCount++;
   [_eventDispatcher sendTextEventWithType:RCTTextEventTypeChange
                                  reactTag:self.reactTag
