@@ -282,7 +282,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
   [_stickyHeaderIndices enumerateIndexesWithOptions:0 usingBlock:
    ^(NSUInteger idx, __unused BOOL *stop) {
 
-    if (idx >= subviewCount) {
+    if (idx > subviewCount) {
       RCTLogError(@"Sticky header index %zd was outside the range {0, %zd}", idx, subviewCount);
       return;
     }

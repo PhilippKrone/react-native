@@ -289,8 +289,8 @@ RCT_EXPORT_MODULE()
 
     // If we still can't decode it, bail out
     if (!responseText) {
-      RCTLogWarn(@"Received data was not a string, or was not a recognised encoding.");
-      return;
+     // RCTLogWarn(@"Received data was not a string, or was not a recognised encoding.");
+     // return;
     }
   }
 
