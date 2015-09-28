@@ -33,6 +33,7 @@ var requireNativeComponent = require('requireNativeComponent');
 var onlyMultiline = {
   onTextInput: true, // not supported in Open Source yet
   children: true,
+  autoGrow: true,
 };
 
 var notMultiline = {
@@ -109,6 +110,11 @@ var TextInput = React.createClass({
      * If false, disables auto-correct. The default value is true.
      */
     autoCorrect: PropTypes.bool,
+    /**
+     * If true, and the input is multiline, the input's height will grow automatically. The default value is true.
+     * @platorm ios
+     */
+    autoGrow: PropTypes.bool,
     /**
      * If true, focuses the input on componentDidMount.
      * The default value is false.

@@ -13,6 +13,7 @@
 #import "RCTEventDispatcher.h"
 #import "RCTText.h"
 #import "RCTUtils.h"
+#import "RCTUIManager.h"
 #import "UIView+React.h"
 
 @interface RCTUITextView : UITextView
@@ -33,8 +34,11 @@
 
 @implementation RCTTextView
 {
+  RCTBridge *_bridge;
   RCTEventDispatcher *_eventDispatcher;
   BOOL _jsRequestingFirstResponder;
+  BOOL _autoGrow;
+  float _origHeight;
   NSString *_placeholder;
   UITextView *_placeholderView;
   UITextView *_textView;
@@ -46,18 +50,19 @@
   UITextRange *_previousSelectionRange;
 }
 
-- (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
+- (instancetype)initWithBridge:(RCTBridge *)bridge
 {
-  RCTAssertParam(eventDispatcher);
+  RCTAssertParam(bridge);
 
   if ((self = [super initWithFrame:CGRectZero])) {
+    _bridge = bridge;
+    _autoGrow = false;
     _contentInset = UIEdgeInsetsZero;
-    _eventDispatcher = eventDispatcher;
+    _eventDispatcher = _bridge.eventDispatcher;
     _placeholderTextColor = [self defaultPlaceholderTextColor];
 
     _textView = [[RCTUITextView alloc] initWithFrame:self.bounds];
     _textView.backgroundColor = [UIColor clearColor];
-    _textView.scrollsToTop = NO;
     _textView.delegate = self;
 
     _previousSelectionRange = _textView.selectedTextRange;
@@ -177,6 +182,10 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 
   _textView.textContainerInset = adjustedTextContainerInset;
   _placeholderView.textContainerInset = adjustedTextContainerInset;
+  
+  if (! _origHeight) {
+    _origHeight = self.frame.size.height;
+  }
 }
 
 - (void)updatePlaceholder
@@ -343,6 +352,11 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
   return _textView.autocorrectionType == UITextAutocorrectionTypeYes;
 }
 
+- (void)setAutoGrow:(BOOL)autoGrow
+{
+  _autoGrow = autoGrow;
+}
+
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView
 {
   if (_selectTextOnFocus) {
@@ -369,6 +383,22 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 
 - (void)textViewDidChange:(UITextView *)textView
 {
+  if (_autoGrow) {
+    _textView.scrollEnabled = NO;
+  
+    [_textView sizeToFit];
+    float newHeight;
+
+    if (_textView.frame.size.height >= _origHeight) {
+      newHeight = _textView.frame.size.height;
+    } else {
+      newHeight = _origHeight;
+    }
+  
+    CGRect newFrame = CGRectMake(0, 0, self.frame.size.width, newHeight);
+    [_bridge.uiManager setFrame:newFrame forView:self];
+  }
+
   [self _setPlaceholderVisibility];
   _nativeEventCount++;
   [_eventDispatcher sendTextEventWithType:RCTTextEventTypeChange

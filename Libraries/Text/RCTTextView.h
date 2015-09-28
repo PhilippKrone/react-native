@@ -10,6 +10,7 @@
 #import <UIKit/UIKit.h>
 
 #import "RCTView.h"
+#import "RCTUIManager.h"
 #import "UIView+React.h"
 
 @class RCTEventDispatcher;
@@ -17,6 +18,7 @@
 @interface RCTTextView : RCTView <UITextViewDelegate>
 
 @property (nonatomic, assign) BOOL autoCorrect;
+@property (nonatomic, assign) BOOL autoGrow;
 @property (nonatomic, assign) BOOL clearTextOnFocus;
 @property (nonatomic, assign) BOOL selectTextOnFocus;
 @property (nonatomic, assign) UIEdgeInsets contentInset;
@@ -28,9 +30,13 @@
 @property (nonatomic, assign) NSInteger mostRecentEventCount;
 @property (nonatomic, strong) NSNumber *maxLength;
 
+<<<<<<< HEAD
 @property (nonatomic, copy) RCTDirectEventBlock onSelectionChange;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
+=======
+- (instancetype)initWithBridge:(RCTBridge *)bridge NS_DESIGNATED_INITIALIZER;
+>>>>>>> [TextInput] Add auto-grow support for multiline TextInput components.
 
 - (void)performTextUpdate;
 
