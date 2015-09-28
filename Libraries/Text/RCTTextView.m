@@ -63,6 +63,7 @@
 
     _textView = [[RCTUITextView alloc] initWithFrame:self.bounds];
     _textView.backgroundColor = [UIColor clearColor];
+    _textView.scrollsToTop = NO;
     _textView.delegate = self;
 
     _previousSelectionRange = _textView.selectedTextRange;
