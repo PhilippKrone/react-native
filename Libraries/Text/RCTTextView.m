@@ -187,7 +187,6 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
   if (! _origHeight) {
     _origHeight = self.frame.size.height;
   }
-  [self updateTextViewFrame];
 }
 
 - (void)updatePlaceholder
@@ -218,25 +217,15 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
   }
 
   if (_autoGrow) {
-    UITextView *textView;
-    if (_placeholderView) {
-      textView = [_placeholderView isHidden] ? _textView : _placeholderView;
-    } else {
-      textView = _textView;
-    }
-    
-    if (CGRectIsEmpty(self.frame)) {
-      return;
-    }
 
-    float currentHeight = textView.frame.size.height;
+    float currentHeight = _textView.frame.size.height;
     float newHeight;
 
-    textView.scrollEnabled = NO;
-    [textView sizeToFit];
+    _textView.scrollEnabled = NO;
+    [_textView sizeToFit];
 
-    if (textView.frame.size.height >= _origHeight) {
-      newHeight = textView.frame.size.height;
+    if (_textView.frame.size.height >= _origHeight) {
+      newHeight = _textView.frame.size.height;
     } else {
       newHeight = _origHeight;
     }
@@ -258,7 +247,6 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 {
   _textView.font = font;
   [self updatePlaceholder];
-  [self updateTextViewFrame];
 }
 
 - (UIColor *)textColor
