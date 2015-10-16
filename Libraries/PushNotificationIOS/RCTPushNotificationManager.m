@@ -168,21 +168,6 @@ RCT_EXPORT_METHOD(requestPermissions:(NSDictionary *)permissions)
   } else {
     types = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound;
   }
-<<<<<<< HEAD
-  
-  if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)]) {
-    
-    id notificationSettings = [UIUserNotificationSettings settingsForTypes:types categories:nil];
-    [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
-    [[UIApplication sharedApplication] registerForRemoteNotifications];
-    
-  }else{
-    
-    [[UIApplication sharedApplication] registerForRemoteNotificationTypes:types];
-    
-  }
-  
-=======
 
   UIApplication *app = RCTSharedApplication();
   if ([app respondsToSelector:@selector(registerUserNotificationSettings:)]) {
@@ -192,7 +177,6 @@ RCT_EXPORT_METHOD(requestPermissions:(NSDictionary *)permissions)
   } else {
     [app registerForRemoteNotificationTypes:(NSUInteger)types];
   }
->>>>>>> 1091ecd8e09d1160bc8b0c61a5fe8ffa91ed1a28
 }
 
 RCT_EXPORT_METHOD(abandonPermissions)
