@@ -175,6 +175,9 @@ RCT_EXPORT_METHOD(requestPermissions:(NSDictionary *)permissions)
     types = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound;
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Merging of PushNotification
 
   UIApplication *app = RCTSharedApplication();
   if ([app respondsToSelector:@selector(registerUserNotificationSettings:)]) {
@@ -184,6 +187,7 @@ RCT_EXPORT_METHOD(requestPermissions:(NSDictionary *)permissions)
   } else {
     [app registerForRemoteNotificationTypes:(NSUInteger)types];
   }
+<<<<<<< HEAD
 =======
   
   if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)]) {
@@ -199,6 +203,8 @@ RCT_EXPORT_METHOD(requestPermissions:(NSDictionary *)permissions)
   }
   
 >>>>>>> Yoloci changes
+=======
+>>>>>>> Merging of PushNotification
 }
 
 RCT_EXPORT_METHOD(abandonPermissions)
