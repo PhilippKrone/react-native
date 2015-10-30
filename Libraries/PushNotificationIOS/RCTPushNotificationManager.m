@@ -95,15 +95,9 @@ RCT_EXPORT_MODULE()
   for (NSUInteger i = 0; i < deviceTokenLength; i++) {
     [hexString appendFormat:@"%02x", bytes[i]];
   }
-<<<<<<< HEAD
   NSDictionary<NSString *, id> *userInfo = @{
     @"deviceToken" : [hexString copy]
   };
-=======
-  NSDictionary *userInfo = @{
-                             @"deviceToken" : [hexString copy]
-                             };
->>>>>>> Yoloci changes
   [[NSNotificationCenter defaultCenter] postNotificationName:RCTRemoteNotificationsRegistered
                                                       object:self
                                                     userInfo:userInfo];
@@ -174,11 +168,6 @@ RCT_EXPORT_METHOD(requestPermissions:(NSDictionary *)permissions)
   } else {
     types = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound;
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Merging of PushNotification
-
   UIApplication *app = RCTSharedApplication();
   if ([app respondsToSelector:@selector(registerUserNotificationSettings:)]) {
     UIUserNotificationSettings *notificationSettings = [UIUserNotificationSettings settingsForTypes:(NSUInteger)types categories:nil];
@@ -187,25 +176,9 @@ RCT_EXPORT_METHOD(requestPermissions:(NSDictionary *)permissions)
   } else {
     [app registerForRemoteNotificationTypes:(NSUInteger)types];
   }
-<<<<<<< HEAD
-=======
+
   
-  if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)]) {
-    
-    id notificationSettings = [UIUserNotificationSettings settingsForTypes:types categories:nil];
-    [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
-    [[UIApplication sharedApplication] registerForRemoteNotifications];
-    
-  }else{
-    
-    [[UIApplication sharedApplication] registerForRemoteNotificationTypes:types];
-    
-  }
-  
->>>>>>> Yoloci changes
-=======
->>>>>>> Merging of PushNotification
-}
+
 
 RCT_EXPORT_METHOD(abandonPermissions)
 {
@@ -214,34 +187,20 @@ RCT_EXPORT_METHOD(abandonPermissions)
 
 RCT_EXPORT_METHOD(checkPermissions:(RCTResponseSenderBlock)callback)
 {
-<<<<<<< HEAD
   if (RCTRunningInAppExtension()) {
     NSDictionary<NSString *, NSNumber *> *permissions = @{@"alert": @NO, @"badge": @NO, @"sound": @NO};
     callback(@[permissions]);
     return;
   }
 
-=======
->>>>>>> Yoloci changes
   NSUInteger types = 0;
   if ([UIApplication instancesRespondToSelector:@selector(currentUserNotificationSettings)]) {
     types = [[UIApplication sharedApplication] currentUserNotificationSettings].types;
   } else {
-    
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_8_0
-    
     types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
-    
-#endif
-    
   }
-<<<<<<< HEAD
 
   NSMutableDictionary<NSString *, NSNumber *> *permissions = [NSMutableDictionary new];
-=======
-  
-  NSMutableDictionary *permissions = [NSMutableDictionary new];
->>>>>>> Yoloci changes
   permissions[@"alert"] = @((types & UIUserNotificationTypeAlert) > 0);
   permissions[@"badge"] = @((types & UIUserNotificationTypeBadge) > 0);
   permissions[@"sound"] = @((types & UIUserNotificationTypeSound) > 0);
@@ -266,13 +225,7 @@ RCT_EXPORT_METHOD(scheduleLocalNotification:(UILocalNotification *)notification)
   [[UIApplication sharedApplication] scheduleLocalNotification:notification];
 }
 
-<<<<<<< HEAD
 RCT_EXPORT_METHOD(cancelAllLocalNotifications)
 {
   [RCTSharedApplication() cancelAllLocalNotifications];
 }
-
-@end
-=======
-@end
->>>>>>> Yoloci changes
