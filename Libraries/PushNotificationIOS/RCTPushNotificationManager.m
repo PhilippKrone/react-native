@@ -224,13 +224,9 @@ RCT_EXPORT_METHOD(scheduleLocalNotification:(UILocalNotification *)notification)
   [[UIApplication sharedApplication] scheduleLocalNotification:notification];
 }
 
-<<<<<<< HEAD
 @end
-=======
 RCT_EXPORT_METHOD(cancelAllLocalNotifications)
 {
   [RCTSharedApplication() cancelAllLocalNotifications];
 }
 
-@end
->>>>>>> c16ffd31627a1d29dbe36da4ac02d98fa5a239bc
