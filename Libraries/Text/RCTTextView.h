@@ -30,14 +30,10 @@
 @property (nonatomic, assign) NSInteger mostRecentEventCount;
 @property (nonatomic, strong) NSNumber *maxLength;
 
-<<<<<<< HEAD
 @property (nonatomic, copy) RCTDirectEventBlock onSelectionChange;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
-=======
-- (instancetype)initWithBridge:(RCTBridge *)bridge NS_DESIGNATED_INITIALIZER;
->>>>>>> [TextInput] Add auto-grow support for multiline TextInput components.
-
 - (void)performTextUpdate;
+
 
 @end

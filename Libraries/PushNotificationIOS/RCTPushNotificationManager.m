@@ -26,7 +26,6 @@
 
 NSString *const RCTRemoteNotificationReceived = @"RemoteNotificationReceived";
 NSString *const RCTRemoteNotificationsRegistered = @"RemoteNotificationsRegistered";
-NSString *const RCTRemoteNotificationRegisteredError = @"RemoteNotificationRegisteredError";
 
 @implementation RCTConvert (UILocalNotification)
 
@@ -60,10 +59,6 @@ RCT_EXPORT_MODULE()
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleRemoteNotificationsRegistered:)
                                                  name:RCTRemoteNotificationsRegistered
-                                               object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handleRemoteNotificationRegisteredError:)
-                                                 name:RCTRemoteNotificationRegisteredError
                                                object:nil];
   }
   return self;
@@ -110,13 +105,6 @@ RCT_EXPORT_MODULE()
                                                     userInfo:notification];
 }
 
-+ (void)application:(__unused UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
-{
-  [[NSNotificationCenter defaultCenter] postNotificationName:RCTRemoteNotificationRegisteredError
-                                                      object:self
-                                                    userInfo:error.userInfo];
-}
-
 - (void)handleRemoteNotificationReceived:(NSNotification *)notification
 {
   [_bridge.eventDispatcher sendDeviceEventWithName:@"remoteNotificationReceived"
@@ -128,18 +116,13 @@ RCT_EXPORT_MODULE()
   [_bridge.eventDispatcher sendDeviceEventWithName:@"remoteNotificationsRegistered"
                                               body:notification.userInfo];
 }
-- (void)handleRemoteNotificationRegisteredError:(NSNotification *)notification
-{
-  [_bridge.eventDispatcher sendDeviceEventWithName:@"remoteNotificationsRegisteredError"
-                                              body:[notification userInfo]];
-}
 
 /**
  * Update the application icon badge number on the home screen
  */
 RCT_EXPORT_METHOD(setApplicationIconBadgeNumber:(NSInteger)number)
 {
-  [UIApplication sharedApplication].applicationIconBadgeNumber = number;
+  RCTSharedApplication().applicationIconBadgeNumber = number;
 }
 
 /**
@@ -148,12 +131,16 @@ RCT_EXPORT_METHOD(setApplicationIconBadgeNumber:(NSInteger)number)
 RCT_EXPORT_METHOD(getApplicationIconBadgeNumber:(RCTResponseSenderBlock)callback)
 {
   callback(@[
-             @([UIApplication sharedApplication].applicationIconBadgeNumber)
-             ]);
+    @(RCTSharedApplication().applicationIconBadgeNumber)
+  ]);
 }
 
 RCT_EXPORT_METHOD(requestPermissions:(NSDictionary *)permissions)
 {
+  if (RCTRunningInAppExtension()) {
+    return;
+  }
+
   UIUserNotificationType types = UIUserNotificationTypeNone;
   if (permissions) {
     if ([permissions[@"alert"] boolValue]) {
@@ -168,6 +155,7 @@ RCT_EXPORT_METHOD(requestPermissions:(NSDictionary *)permissions)
   } else {
     types = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound;
   }
+
   UIApplication *app = RCTSharedApplication();
   if ([app respondsToSelector:@selector(registerUserNotificationSettings:)]) {
     UIUserNotificationSettings *notificationSettings = [UIUserNotificationSettings settingsForTypes:(NSUInteger)types categories:nil];
@@ -176,13 +164,11 @@ RCT_EXPORT_METHOD(requestPermissions:(NSDictionary *)permissions)
   } else {
     [app registerForRemoteNotificationTypes:(NSUInteger)types];
   }
-
-  
-
+}
 
 RCT_EXPORT_METHOD(abandonPermissions)
 {
-  [[UIApplication sharedApplication] unregisterForRemoteNotifications];
+  [RCTSharedApplication() unregisterForRemoteNotifications];
 }
 
 RCT_EXPORT_METHOD(checkPermissions:(RCTResponseSenderBlock)callback)
@@ -195,37 +181,45 @@ RCT_EXPORT_METHOD(checkPermissions:(RCTResponseSenderBlock)callback)
 
   NSUInteger types = 0;
   if ([UIApplication instancesRespondToSelector:@selector(currentUserNotificationSettings)]) {
-    types = [[UIApplication sharedApplication] currentUserNotificationSettings].types;
+    types = [RCTSharedApplication() currentUserNotificationSettings].types;
   } else {
-    types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_8_0
+
+    types = [RCTSharedApplication() enabledRemoteNotificationTypes];
+
+#endif
+
   }
 
   NSMutableDictionary<NSString *, NSNumber *> *permissions = [NSMutableDictionary new];
   permissions[@"alert"] = @((types & UIUserNotificationTypeAlert) > 0);
   permissions[@"badge"] = @((types & UIUserNotificationTypeBadge) > 0);
   permissions[@"sound"] = @((types & UIUserNotificationTypeSound) > 0);
-  
+
   callback(@[permissions]);
 }
 
 - (NSDictionary<NSString *, id> *)constantsToExport
 {
   return @{
-           @"initialNotification": RCTNullIfNil(_initialNotification),
-           };
+    @"initialNotification": RCTNullIfNil(_initialNotification),
+  };
 }
 
 RCT_EXPORT_METHOD(presentLocalNotification:(UILocalNotification *)notification)
 {
-  [[UIApplication sharedApplication] presentLocalNotificationNow:notification];
+  [RCTSharedApplication() presentLocalNotificationNow:notification];
 }
 
 RCT_EXPORT_METHOD(scheduleLocalNotification:(UILocalNotification *)notification)
 {
-  [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+  [RCTSharedApplication() scheduleLocalNotification:notification];
 }
 
 RCT_EXPORT_METHOD(cancelAllLocalNotifications)
 {
   [RCTSharedApplication() cancelAllLocalNotifications];
 }
+
+@end
