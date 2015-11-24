@@ -46,6 +46,7 @@ static NSDictionary *RCTProfileInfo;
 static NSMutableDictionary *RCTProfileOngoingEvents;
 static NSTimeInterval RCTProfileStartTime;
 static NSUInteger RCTProfileEventID = 0;
+static CADisplayLink *RCTProfileDisplayLink;
 
 #pragma mark - Macros
 
@@ -174,9 +175,9 @@ IMP RCTProfileGetImplementation(id obj, SEL cmd)
  * state, call the actual function we want to profile and stop the profiler.
  *
  * The implementation can be found in RCTProfileTrampoline-<arch>.s where arch
- * is one of: x86, x86_64, arm, arm64.
+ * is one of: i386, x86_64, arm, arm64.
  */
-#if defined(__x86__) || \
+#if defined(__i386__) || \
     defined(__x86_64__) || \
     defined(__arm__) || \
     defined(__arm64__)
@@ -266,6 +267,19 @@ void RCTProfileUnhookModules(RCTBridge *bridge)
   dispatch_group_leave(RCTProfileGetUnhookGroup());
 }
 
+#pragma mark - Private ObjC class only used for the vSYNC CADisplayLink target
+
+@interface RCTProfile : NSObject
+@end
+
+@implementation RCTProfile
+
++ (void)vsync:(__unused CADisplayLink *)displayLink
+{
+  RCTProfileImmediateEvent(0, @"VSYNC", 'g');
+}
+
+@end
 
 #pragma mark - Public Functions
 
@@ -312,6 +326,11 @@ void RCTProfileInit(RCTBridge *bridge)
 
   RCTProfileHookModules(bridge);
 
+  RCTProfileDisplayLink = [CADisplayLink displayLinkWithTarget:[RCTProfile class]
+                                                      selector:@selector(vsync:)];
+  [RCTProfileDisplayLink addToRunLoop:[NSRunLoop mainRunLoop]
+                              forMode:NSRunLoopCommonModes];
+
   [[NSNotificationCenter defaultCenter] postNotificationName:RCTProfileDidStartProfiling
                                                       object:nil];
 }
@@ -328,6 +347,9 @@ void RCTProfileEnd(RCTBridge *bridge, void (^callback)(NSString *))
 
   [[NSNotificationCenter defaultCenter] postNotificationName:RCTProfileDidEndProfiling
                                                       object:nil];
+
+  [RCTProfileDisplayLink invalidate];
+  RCTProfileDisplayLink = nil;
 
   RCTProfileUnhookModules(bridge);
 

@@ -160,7 +160,8 @@ function setUpWebSockets() {
 
 function setUpProfile() {
   if (__DEV__) {
-    require('BridgeProfiling').swizzleReactPerf();
+    var BridgeProfiling = require('BridgeProfiling');
+    BridgeProfiling.swizzleReactPerf();
   }
 }
 

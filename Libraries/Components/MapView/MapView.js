@@ -63,6 +63,7 @@ var MapView = React.createClass({
   },
 
   propTypes: {
+    ...View.propTypes,
     /**
      * Used to style and layout the `MapView`.  See `StyleSheet.js` and
      * `ViewStylePropTypes.js` for more info.
@@ -85,6 +86,13 @@ var MapView = React.createClass({
      * @platform ios
      */
     showsPointsOfInterest: React.PropTypes.bool,
+
+    /**
+     * If `false` compass won't be displayed on the map.
+     * Default value is `true`.
+     * @platform ios
+     */
+    showsCompass: React.PropTypes.bool,
 
     /**
      * If `false` the user won't be able to pinch/zoom the map.

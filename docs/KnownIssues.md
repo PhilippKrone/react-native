@@ -33,12 +33,10 @@ Webview
 #### Modules
 
 ```
-Geo Location
 Net Info
 Camera Roll
 App State
 Dialog
-Intent
 Media
 Pasteboard
 PushNotificationIOS
@@ -53,15 +51,17 @@ There are properties that work on one platform only, either because they can inh
 
 There are known cases where the APIs could be made more consistent across iOS and Android:
 
-- `<AndroidViewPager>` (to be open sourced soon) and `<ScrollView pagingEnabled={true}>` on iOS do a similar thing. We might want to unify them to `<ViewPager>`.
+- `<AndroidViewPager>` and `<ScrollView pagingEnabled={true}>` on iOS do a similar thing. We might want to unify them to `<ViewPager>`.
 - `alert()` needs Android support (once the Dialogs module is open sourced)
 - It might be possible to bring `LinkingIOS` and `IntentAndroid` (to be open sourced) closer together.
 - `ActivityIndicator` could render a native spinning indicator on both platforms (currently this is done using `ActivityIndicatorIOS` on iOS and `ProgressBarAndroid` on Android).
-- `ProgressBar` could render a horizontal progress bar on both platforms (currently only supported on iOS via `ProgressViewIOS`).
+- `ProgressBar` could render a horizontal progress bar on both platforms (on iOS this is `ProgressViewIOS`, on Android it's `ProgressBarAndroid`).
 
-### Publishing modules on Android
+### Using 3rd-party native modules
 
-There is currently no easy way of publishing custom native modules on Android. Smooth work flow for contributors is important and this will be looked at very closely after the initial Open Source release. Of course the aim will be to streamline and optimize the process between iOS and Android as much as possible.
+There are many awesome 3rd party modules: https://react.parts/native
+
+Adding these to your apps should be made simpler. Here's [an example](https://github.com/apptailor/react-native-google-signin) how this is done currently.
 
 ### The `overflow` style property defaults to `hidden` and cannot be changed on Android
 
@@ -70,6 +70,10 @@ This is a result of how Android rendering works. This feature is not being worke
 ### No support for shadows on Android
 
 We don't support shadows on Android currently. These are notoriously hard to implement as they require drawing outside of a view's bounds and Android's invalidation logic has a hard time with that. A possible solution is to use [elevation](https://developer.android.com/training/material/shadows-clipping.html), but more experimentation will be required.
+
+### Android M permissions
+
+The open source version of React Native doesn't yet support the [Android M permission model](http://developer.android.com/training/permissions/requesting.html).
 
 ### Layout-only nodes on Android
 
