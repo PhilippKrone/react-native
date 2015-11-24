@@ -144,6 +144,7 @@ def getNdkBuildName() {
 
 def findNdkBuildFullPath() {
     // we allow to provide full path to ndk-build tool
+    return new File('/usr/local/opt/android-ndk', getNdkBuildName()).getAbsolutePath()
     if (hasProperty('ndk.command')) {
         return property('ndk.command')
     }
